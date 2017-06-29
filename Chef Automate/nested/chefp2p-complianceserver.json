@@ -1,5 +1,5 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
     "contentVersion": "1.0.0.0",
     "parameters": {
         "location": {
@@ -71,7 +71,9 @@
             "defaultValue": ""
         }
     },
-    "variables": {},
+    "variables": {
+        "FQDN": "[concat(parameters('dnsLabelPrefix'),'.',parameters('location'),'.cloudapp.azure.com')]"
+    },
     "resources": [
         {
             "type": "Microsoft.Compute/virtualMachines",
@@ -225,7 +227,27 @@
                 "[resourceId('Microsoft.Network/publicIPAddresses',parameters('publicIP-name'))]",
                 "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('securityGroup-name'))]"
             ]
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(parameters('vm-name'),'/configurl')]",
+            "apiVersion": "[parameters('extension-api-version')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', parameters('vm-name'))]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.Azure.Extensions",
+                "type": "CustomScript",
+                "typeHandlerVersion": "2.0",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "fileUris": [
+                        "[concat(parameters('baseUrl'),'/scripts/configurl.sh')]"
+                    ],
+                    "commandToExecute": "[concat('sh configurl.sh', ' ', variables('FQDN'))]"
+                }
+            }
         }
-
     ]
 }
