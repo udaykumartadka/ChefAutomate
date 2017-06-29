@@ -78,7 +78,6 @@
         "program": "[parameters('tagvalues').program]",
         "project": "[parameters('tagvalues').project]"
       },
-      "kind":"Storage",
       "properties": {
         "accountType": "[parameters('storageAccountType')]"
       }
